@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_title">Últimos registros</string>
+    <string name="widget_title">Glicemia por refeição</string>
     <string name="widget_add">+ Registrar</string>
     <string name="widget_add_description">Registrar nova glicemia</string>
-    <string name="widget_empty">Nenhum registro ainda.</string>
-    <string name="widget_description">Veja os últimos registros de glicemia e registre direto da tela inicial.</string>
+    <string name="widget_empty">Nenhuma medição ainda.</string>
+    <string name="widget_date">Data</string>
+    <string name="widget_breakfast">Café da manhã</string>
+    <string name="widget_lunch">Almoço</string>
+    <string name="widget_dinner">Jantar</string>
+    <string name="widget_note_prefix">Observação:</string>
+    <string name="widget_description">Veja as medições por data e refeição, com observações, e registre direto da tela inicial.</string>
 </resources>

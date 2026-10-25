@@ -3,14 +3,15 @@ using Android.Appwidget;
 using Android.Content;
 using Android.Views;
 using Android.Widget;
+using GlicemiaApp.Core;
 using GlicemiaApp.Models;
 using GlicemiaApp.Services;
 
 namespace GlicemiaApp;
 
 /// <summary>
-/// Widget da tela inicial: os últimos registros (hora, mg/dL, contexto) e o botão "+ Registrar".
-/// Atenção: ele lê o banco sem PIN (veja WidgetFeed e SECURITY.md); a observação nunca é exibida.
+/// Widget da tela inicial: glicemias agrupadas por data e refeição, observações e botão "+ Registrar".
+/// Os dados exibidos, incluindo observações, são lidos sem PIN (veja WidgetFeed e SECURITY.md).
 /// </summary>
 [BroadcastReceiver(Label = "Glicemia", Exported = true)]
 [IntentFilter(["android.appwidget.action.APPWIDGET_UPDATE"])]
@@ -60,18 +61,45 @@ public class GlucoseWidget : AppWidgetProvider
         views.SetOnClickPendingIntent(Resource.Id.widget_root, open);
         views.SetOnClickPendingIntent(Resource.Id.widget_add, open);
 
+        var days = rows
+            .GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date)
+            .OrderByDescending(group => group.Key)
+            .Take(WidgetFeed.DayCount)
+            .ToList();
+
         views.RemoveAllViews(Resource.Id.widget_rows);
-        views.SetViewVisibility(Resource.Id.widget_empty, rows.Count == 0 ? ViewStates.Visible : ViewStates.Gone);
-        foreach (var r in rows)
+        views.SetViewVisibility(Resource.Id.widget_empty, days.Count == 0 ? ViewStates.Visible : ViewStates.Gone);
+        views.SetViewVisibility(Resource.Id.widget_table_header, days.Count == 0 ? ViewStates.Gone : ViewStates.Visible);
+        foreach (var day in days)
         {
             var row = new RemoteViews(context.PackageName, Resource.Layout.widget_row);
-            row.SetTextViewText(Resource.Id.row_time, r.MeasuredAtUtc.ToLocalTime().ToString("dd/MM HH:mm"));
-            row.SetTextViewText(Resource.Id.row_value, $"{r.ValueMgDl} mg/dL");
-            row.SetTextViewText(Resource.Id.row_context, r.Context);
+            row.SetTextViewText(Resource.Id.row_date, day.Key.ToString("dd/MM/yy"));
+            SetMealValue(row, Resource.Id.row_breakfast, day, InputValidator.Contexts[0]);
+            SetMealValue(row, Resource.Id.row_lunch, day, InputValidator.Contexts[1]);
+            SetMealValue(row, Resource.Id.row_dinner, day, InputValidator.Contexts[2]);
+
+            var notes = day
+                .Where(reading => !string.IsNullOrWhiteSpace(reading.Note))
+                .OrderByDescending(reading => reading.MeasuredAtUtc)
+                .Select(reading => reading.Note.Trim())
+                .Distinct();
+            var note = string.Join(" · ", notes);
+            row.SetTextViewText(Resource.Id.row_note, string.IsNullOrEmpty(note)
+                ? ""
+                : $"{context.GetString(Resource.String.widget_note_prefix)} {note}");
+            row.SetViewVisibility(Resource.Id.row_note, string.IsNullOrEmpty(note) ? ViewStates.Gone : ViewStates.Visible);
             views.AddView(Resource.Id.widget_rows, row);
         }
 
         manager.UpdateAppWidget(widgetIds, views);
+    }
+
+    static void SetMealValue(RemoteViews row, int viewId, IEnumerable<GlucoseReading> day, string context)
+    {
+        var reading = day
+            .Where(item => item.Context == context)
+            .MaxBy(item => item.MeasuredAtUtc);
+        row.SetTextViewText(viewId, reading is null ? "—" : $"{reading.ValueMgDl}\nmg/dL");
     }
 
     static PendingIntent? Open(Context context)
