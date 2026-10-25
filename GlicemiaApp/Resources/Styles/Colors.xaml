@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Tokens de design: toda cor do app vem daqui. -->
+    <Color x:Key="Primary">#0F766E</Color>
+    <Color x:Key="PrimaryDark">#14B8A6</Color>
+    <Color x:Key="Ink">#0F172A</Color>
+    <Color x:Key="White">#FFFFFF</Color>
+
+    <Color x:Key="BgLight">#F4F7F7</Color>
+    <Color x:Key="BgDark">#0B1220</Color>
+    <Color x:Key="SurfaceLight">#FFFFFF</Color>
+    <Color x:Key="SurfaceDark">#131C2E</Color>
+    <Color x:Key="FieldLight">#F1F5F9</Color>
+    <Color x:Key="FieldDark">#0F1727</Color>
+
+    <Color x:Key="TextLight">#0F172A</Color>
+    <Color x:Key="TextDark">#E6EDF3</Color>
+    <Color x:Key="MutedLight">#475569</Color>
+    <Color x:Key="MutedDark">#9FB0C3</Color>
+    <Color x:Key="BorderLight">#E2E8F0</Color>
+    <Color x:Key="BorderDark">#25324A</Color>
+
+    <Color x:Key="Danger">#DC2626</Color>
+    <Color x:Key="DangerSoft">#FEE2E2</Color>
+    <Color x:Key="OkSoft">#D1FAE5</Color>
+    <Color x:Key="WarnSoft">#FEF3C7</Color>
+</ResourceDictionary>

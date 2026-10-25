@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:GlicemiaApp.ViewModels"
+             x:Class="GlicemiaApp.Views.LockPage"
+             x:DataType="vm:LockViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <VerticalStackLayout VerticalOptions="Center" Padding="28" Spacing="16">
+
+        <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center" StrokeThickness="0"
+                StrokeShape="RoundRectangle 36"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+            <Label Text="💧" FontSize="34" HorizontalOptions="Center" VerticalOptions="Center"
+                   SemanticProperties.Description="Logotipo do app Glicemia" />
+        </Border>
+
+        <Label Text="{Binding Title}" StyleClass="Title" HorizontalTextAlignment="Center" />
+        <Label Text="{Binding Subtitle}" StyleClass="Muted" HorizontalTextAlignment="Center" />
+
+        <Border StyleClass="Field">
+            <Entry Text="{Binding Pin}" Placeholder="PIN de 6 dígitos"
+                   IsPassword="True" Keyboard="Numeric" MaxLength="6"
+                   IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                   ReturnType="Go" ReturnCommand="{Binding SubmitCommand}"
+                   SemanticProperties.Description="PIN" />
+        </Border>
+
+        <Border StyleClass="Field" IsVisible="{Binding IsCreating}">
+            <Entry Text="{Binding ConfirmPin}" Placeholder="Confirme o PIN"
+                   IsPassword="True" Keyboard="Numeric" MaxLength="6"
+                   IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                   ReturnType="Go" ReturnCommand="{Binding SubmitCommand}"
+                   SemanticProperties.Description="Confirmação do PIN" />
+        </Border>
+
+        <Label Text="{Binding Message}" HorizontalTextAlignment="Center" StyleClass="Muted">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                    <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
+
+        <Button Text="{Binding ButtonText}" Command="{Binding SubmitCommand}" />
+    </VerticalStackLayout>
+</ContentPage>

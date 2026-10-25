@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:GlicemiaApp.ViewModels"
+             x:Class="GlicemiaApp.Views.HistoryPage"
+             x:DataType="vm:HistoryViewModel"
+             Title="Histórico">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16,16,16,0" RowSpacing="10">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="4" ColumnSpacing="12">
+            <Label Text="Histórico" StyleClass="Title" />
+            <Button Grid.Column="1" Text="+ Adicionar" Clicked="OnAddClicked"
+                    HeightRequest="44" Padding="16,0" FontSize="14" VerticalOptions="Center"
+                    SemanticProperties.Description="Adicionar medição ao histórico" />
+            <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Message}" StyleClass="Muted">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                        <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </Grid>
+
+        <!-- Cabeçalho das colunas do grid (mesmas larguras das linhas) -->
+        <Grid Grid.Row="1" ColumnDefinitions="64,72,*,90" Padding="13,0">
+            <Label Grid.Column="0" Text="HORA" StyleClass="ColumnHeader" />
+            <Label Grid.Column="1" Text="MG/DL" StyleClass="ColumnHeader" />
+            <Label Grid.Column="2" Text="CONTEXTO" StyleClass="ColumnHeader" />
+            <Label Grid.Column="3" Text="FAIXA" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
+        </Grid>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}" IsGrouped="True"
+                        SelectionMode="Single" SelectionChanged="OnSelectionChanged">
+
+            <CollectionView.EmptyView>
+                <Label Text="Nenhum registro nos últimos 30 dias." StyleClass="Muted"
+                       HorizontalTextAlignment="Center" Margin="0,40,0,0" />
+            </CollectionView.EmptyView>
+
+            <!-- Cabeçalho de cada dia: a data e o resumo -->
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="vm:DayGroup">
+                    <VerticalStackLayout Padding="4,14,4,6" Spacing="2">
+                        <Label Text="{Binding Title}" StyleClass="SectionTitle" />
+                        <Label Text="{Binding Summary}" StyleClass="Caption" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
+            <!-- Linha do grid: um registro daquele dia -->
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ReadingRow">
+                    <Border StyleClass="Card" Padding="12,10" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="64,72,*,90" RowDefinitions="Auto,Auto" RowSpacing="4">
+                            <Label Grid.Column="0" Text="{Binding Time}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding ValueMgDl}" StyleClass="Value" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="{Binding Context}" LineBreakMode="TailTruncation" VerticalOptions="Center" />
+
+                            <Border Grid.Column="3" StyleClass="Chip" BackgroundColor="{StaticResource OkSoft}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Baixa">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource DangerSoft}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Alta">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource WarnSoft}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="{Binding Status}" StyleClass="ChipText" />
+                            </Border>
+
+                            <Label Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Note}" StyleClass="Caption"
+                                   IsVisible="{Binding HasNote}" LineBreakMode="WordWrap" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

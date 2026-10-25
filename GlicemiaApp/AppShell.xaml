@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="GlicemiaApp.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:GlicemiaApp.Views"
+       Shell.FlyoutBehavior="Disabled"
+       Shell.NavBarIsVisible="False">
+
+    <!-- Primeira rota: sempre a tela de PIN. -->
+    <ShellContent Route="lock" ContentTemplate="{DataTemplate views:LockPage}" />
+
+    <TabBar Route="main">
+        <ShellContent Title="Registrar" Icon="ic_add" ContentTemplate="{DataTemplate views:AddReadingPage}" />
+        <ShellContent Title="Histórico" Icon="ic_list" ContentTemplate="{DataTemplate views:HistoryPage}" />
+    </TabBar>
+</Shell>

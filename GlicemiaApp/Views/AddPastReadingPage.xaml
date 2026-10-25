@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:GlicemiaApp.ViewModels"
+             x:Class="GlicemiaApp.Views.AddPastReadingPage"
+             x:DataType="vm:AddPastReadingViewModel"
+             Title="Adicionar ao histórico">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Adicionar ao histórico" StyleClass="Title" />
+                <Label Text="Informe quando a medição foi feita." StyleClass="Muted" />
+            </VerticalStackLayout>
+
+            <Border StyleClass="Card" Padding="20">
+                <VerticalStackLayout Spacing="12">
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="6">
+                            <Label Text="Data" StyleClass="Caption" />
+                            <Border StyleClass="Field">
+                                <DatePicker Date="{Binding Date}" MinimumDate="{Binding MinDate}" MaximumDate="{Binding MaxDate}"
+                                            Format="dd/MM/yyyy" SemanticProperties.Description="Data da medição" />
+                            </Border>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="Hora" StyleClass="Caption" />
+                            <Border StyleClass="Field">
+                                <TimePicker Time="{Binding Time}" Format="HH:mm" SemanticProperties.Description="Hora da medição" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Glicemia (mg/dL)" StyleClass="Caption" />
+                    <Border StyleClass="Field">
+                        <Entry Text="{Binding ValueText}" Placeholder="Ex.: 98" FontSize="32"
+                               Keyboard="Numeric" MaxLength="3"
+                               IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                               SemanticProperties.Description="Valor da glicemia em miligramas por decilitro" />
+                    </Border>
+
+                    <Label Text="Contexto" StyleClass="Caption" />
+                    <Border StyleClass="Field">
+                        <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding SelectedContext}" Title="Selecione" />
+                    </Border>
+
+                    <Label Text="Observação (opcional)" StyleClass="Caption" />
+                    <Border StyleClass="Field">
+                        <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
+                               IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
+                    </Border>
+
+                    <Button Text="Salvar registro" Command="{Binding SaveCommand}" Margin="0,8,0,0" />
+
+                    <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="Cancelar" StyleClass="Secondary" Command="{Binding CancelCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

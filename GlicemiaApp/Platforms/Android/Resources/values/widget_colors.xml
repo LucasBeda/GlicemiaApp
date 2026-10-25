@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">#FFFFFF</color>
+    <color name="widget_border">#E2E8F0</color>
+    <color name="widget_text">#0F172A</color>
+    <color name="widget_muted">#475569</color>
+    <color name="widget_chip">#CCFBF1</color>
+    <color name="widget_chip_text">#0F766E</color>
+</resources>
