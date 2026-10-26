@@ -5,13 +5,19 @@ using GlicemiaApp.Services;
 
 namespace GlicemiaApp.ViewModels;
 
-/// <summary>Registro rápido (aberto pelo widget): só a glicemia e o contexto; data e hora são as de agora.</summary>
+/// <summary>Registro rápido (aberto pelo widget): glicemia, contexto e observação; data e hora são as de agora.</summary>
 public partial class QuickAddViewModel(GlucoseRepository repository) : SecureViewModel
 {
     [ObservableProperty] private string valueText = "";
-    [ObservableProperty] private string? selectedContext = InputValidator.Contexts[0];
+    [ObservableProperty] private string? selectedContext = GetContextForTime(DateTime.Now.TimeOfDay);
+    [ObservableProperty] private string note = "";
 
     public string[] Contexts => InputValidator.Contexts;
+
+    private static string GetContextForTime(TimeSpan time) =>
+        time.Hours >= 18 ? InputValidator.Contexts[2]
+        : time.Hours >= 12 ? InputValidator.Contexts[1]
+        : InputValidator.Contexts[0];
 
     public void Preset(string? context)
     {
@@ -21,7 +27,7 @@ public partial class QuickAddViewModel(GlucoseRepository repository) : SecureVie
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async () =>
     {
-        var error = await repository.AddAsync(ValueText, SelectedContext, "");
+        var error = await repository.AddAsync(ValueText, SelectedContext, Note);
         if (error is not null) { Show(error, true); return; }
 
 #if ANDROID

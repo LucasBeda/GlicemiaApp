@@ -30,6 +30,12 @@
                         <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding SelectedContext}" Title="Selecione" />
                     </Border>
 
+                    <Label Text="Observação (opcional)" StyleClass="Caption" />
+                    <Border StyleClass="Field">
+                        <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
+                               IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
+                    </Border>
+
                     <Button Text="Salvar registro" Command="{Binding SaveCommand}" Margin="0,8,0,0" />
 
                     <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
