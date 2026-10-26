@@ -26,4 +26,10 @@
     <Color x:Key="DangerSoft">#FEE2E2</Color>
     <Color x:Key="OkSoft">#D1FAE5</Color>
     <Color x:Key="WarnSoft">#FEF3C7</Color>
+    <Color x:Key="GlucoseLowLight">#B91C1C</Color>
+    <Color x:Key="GlucoseLowDark">#F87171</Color>
+    <Color x:Key="GlucoseInRangeLight">#15803D</Color>
+    <Color x:Key="GlucoseInRangeDark">#4ADE80</Color>
+    <Color x:Key="GlucoseHighLight">#B45309</Color>
+    <Color x:Key="GlucoseHighDark">#FBBF24</Color>
 </ResourceDictionary>

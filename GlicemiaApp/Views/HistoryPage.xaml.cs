@@ -27,10 +27,15 @@ public partial class HistoryPage : ContentPage
         await Navigation.PushModalAsync(modal);
     }
 
-    void OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    void OnBreakfastTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Breakfast);
+
+    void OnLunchTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Lunch);
+
+    void OnDinnerTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Dinner);
+
+    void DeleteReading(object? sender, Func<HistoryDay, ReadingRow?> selectReading)
     {
-        if (e.CurrentSelection.FirstOrDefault() is not ReadingRow row) return;
-        ((CollectionView)sender!).SelectedItem = null; // permite tocar de novo no mesmo item
-        _vm.DeleteCommand.Execute(row);
+        if (sender is BindableObject { BindingContext: HistoryDay day } && selectReading(day) is ReadingRow row)
+            _vm.DeleteCommand.Execute(row);
     }
 }

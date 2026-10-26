@@ -8,7 +8,7 @@ public partial class HistoryViewModel : SecureViewModel
 {
     readonly GlucoseRepository _repository;
 
-    public ObservableCollection<DayGroup> Days { get; } = [];
+    public ObservableCollection<HistoryDay> Days { get; } = [];
 
     public HistoryViewModel(GlucoseRepository repository, SessionService session)
     {
@@ -40,8 +40,8 @@ public partial class HistoryViewModel : SecureViewModel
         var rows = await _repository.ListAsync(days: GlicemiaApp.Core.InputValidator.MaxBackdateDays);
         Days.Clear();
         foreach (var day in rows.GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date).OrderByDescending(g => g.Key))
-            Days.Add(new DayGroup(day.Key, day.OrderByDescending(r => r.MeasuredAtUtc).Select(r => new ReadingRow(r))));
+            Days.Add(new HistoryDay(day.Key, day));
 
-        Show(rows.Count == 0 ? "" : "Toque em um registro para excluí-lo.");
+        Show(rows.Count == 0 ? "" : "Toque em um valor para excluí-lo.");
     }
 }

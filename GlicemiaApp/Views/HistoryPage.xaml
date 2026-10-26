@@ -22,54 +22,93 @@
             </Label>
         </Grid>
 
-        <!-- Cabeçalho das colunas do grid (mesmas larguras das linhas) -->
-        <Grid Grid.Row="1" ColumnDefinitions="64,72,*,90" Padding="13,0">
-            <Label Grid.Column="0" Text="HORA" StyleClass="ColumnHeader" />
-            <Label Grid.Column="1" Text="MG/DL" StyleClass="ColumnHeader" />
-            <Label Grid.Column="2" Text="CONTEXTO" StyleClass="ColumnHeader" />
-            <Label Grid.Column="3" Text="FAIXA" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
+        <Grid Grid.Row="1" ColumnDefinitions="68,*,*,*" Padding="8,0" ColumnSpacing="2">
+            <Label Grid.Column="0" Text="DATA" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
+            <Label Grid.Column="1" Text="CAFÉ" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
+            <Label Grid.Column="2" Text="ALMOÇO" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
+            <Label Grid.Column="3" Text="JANTAR" StyleClass="ColumnHeader" HorizontalTextAlignment="Center" />
         </Grid>
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}" IsGrouped="True"
-                        SelectionMode="Single" SelectionChanged="OnSelectionChanged">
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}" SelectionMode="None">
 
             <CollectionView.EmptyView>
                 <Label Text="Nenhum registro nos últimos 30 dias." StyleClass="Muted"
                        HorizontalTextAlignment="Center" Margin="0,40,0,0" />
             </CollectionView.EmptyView>
 
-            <!-- Cabeçalho de cada dia: a data e o resumo -->
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate x:DataType="vm:DayGroup">
-                    <VerticalStackLayout Padding="4,14,4,6" Spacing="2">
-                        <Label Text="{Binding Title}" StyleClass="SectionTitle" />
-                        <Label Text="{Binding Summary}" StyleClass="Caption" />
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
-
-            <!-- Linha do grid: um registro daquele dia -->
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:ReadingRow">
-                    <Border StyleClass="Card" Padding="12,10" Margin="0,0,0,8">
-                        <Grid ColumnDefinitions="64,72,*,90" RowDefinitions="Auto,Auto" RowSpacing="4">
-                            <Label Grid.Column="0" Text="{Binding Time}" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="{Binding ValueMgDl}" StyleClass="Value" VerticalOptions="Center" />
-                            <Label Grid.Column="2" Text="{Binding Context}" LineBreakMode="TailTruncation" VerticalOptions="Center" />
+                <DataTemplate x:DataType="vm:HistoryDay">
+                    <Border StyleClass="Card" Padding="8,10" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="68,*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="2" RowSpacing="6">
+                            <Label Grid.Column="0" Text="{Binding Date}" FontSize="14"
+                                   HorizontalTextAlignment="Center" VerticalOptions="Center" />
 
-                            <Border Grid.Column="3" StyleClass="Chip" BackgroundColor="{StaticResource OkSoft}">
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Baixa">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource DangerSoft}" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Alta">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource WarnSoft}" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="{Binding Status}" StyleClass="ChipText" />
+                            <Border Grid.Column="1" Background="Transparent" StrokeThickness="0" Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnBreakfastTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding BreakfastValue}" FontSize="14" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding BreakfastStatus}" Value="Baixa">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseLowLight}, Dark={StaticResource GlucoseLowDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding BreakfastStatus}" Value="Na meta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseInRangeLight}, Dark={StaticResource GlucoseInRangeDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding BreakfastStatus}" Value="Alta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseHighLight}, Dark={StaticResource GlucoseHighDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
                             </Border>
 
-                            <Label Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Note}" StyleClass="Caption"
+                            <Border Grid.Column="2" Background="Transparent" StrokeThickness="0" Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLunchTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding LunchValue}" FontSize="14" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding LunchStatus}" Value="Baixa">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseLowLight}, Dark={StaticResource GlucoseLowDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding LunchStatus}" Value="Na meta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseInRangeLight}, Dark={StaticResource GlucoseInRangeDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding LunchStatus}" Value="Alta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseHighLight}, Dark={StaticResource GlucoseHighDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+
+                            <Border Grid.Column="3" Background="Transparent" StrokeThickness="0" Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnDinnerTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding DinnerValue}" FontSize="14" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DinnerStatus}" Value="Baixa">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseLowLight}, Dark={StaticResource GlucoseLowDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DinnerStatus}" Value="Na meta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseInRangeLight}, Dark={StaticResource GlucoseInRangeDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding DinnerStatus}" Value="Alta">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource GlucoseHighLight}, Dark={StaticResource GlucoseHighDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Label Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding OtherReadings}"
+                                   StyleClass="Caption" IsVisible="{Binding HasOtherReadings}"
+                                   LineBreakMode="WordWrap" />
+                            <Label Grid.Row="2" Grid.ColumnSpan="4" Text="{Binding Note}" StyleClass="Caption"
                                    IsVisible="{Binding HasNote}" LineBreakMode="WordWrap" />
                         </Grid>
                     </Border>
