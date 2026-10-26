@@ -6,65 +6,132 @@
              x:DataType="vm:AddPastReadingViewModel"
              Title="Adicionar ao histórico">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="16">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="16">
 
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Adicionar ao histórico" StyleClass="Title" />
-                <Label Text="Informe quando a medição foi feita." StyleClass="Muted" />
-            </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Adicionar ao histórico" StyleClass="Title" />
+                    <Label Text="Escolha a data e preencha uma ou mais medições." StyleClass="Muted" />
+                </VerticalStackLayout>
 
-            <Border StyleClass="Card" Padding="20">
-                <VerticalStackLayout Spacing="12">
+                <Border StyleClass="Card" Padding="16">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Data" StyleClass="Caption" />
+                        <Border StyleClass="Field">
+                            <DatePicker Date="{Binding Date}" MinimumDate="{Binding MinDate}" MaximumDate="{Binding MaxDate}"
+                                        Format="dd/MM/yyyy" SemanticProperties.Description="Data das medições" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="6">
-                            <Label Text="Data" StyleClass="Caption" />
-                            <Border StyleClass="Field">
-                                <DatePicker Date="{Binding Date}" MinimumDate="{Binding MinDate}" MaximumDate="{Binding MaxDate}"
-                                            Format="dd/MM/yyyy" SemanticProperties.Description="Data da medição" />
+                <Border StyleClass="Card" Padding="12">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="Glicemia" StyleClass="Caption" />
+                            <Label Grid.Column="1" Text="Horário" StyleClass="Caption" />
+                            <Label Grid.Column="2" Text="Contexto" StyleClass="Caption" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                            <Border Grid.Column="0" StyleClass="Field">
+                                <Entry Text="{Binding Reading1ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
+                                       MaxLength="3" HorizontalTextAlignment="Center"
+                                       IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                                       SemanticProperties.Description="Valor da primeira medição" />
                             </Border>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="6">
-                            <Label Text="Hora" StyleClass="Caption" />
-                            <Border StyleClass="Field">
-                                <TimePicker Time="{Binding Time}" Format="HH:mm" SemanticProperties.Description="Hora da medição" />
+                            <Border Grid.Column="1" StyleClass="Field">
+                                <TimePicker Time="{Binding Reading1Time}" Format="HH:mm"
+                                            SemanticProperties.Description="Horário da primeira medição" />
                             </Border>
+                            <Border Grid.Column="2" StyleClass="Field">
+                                <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding Reading1Context}"
+                                        Title="Contexto" />
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                            <Border Grid.Column="0" StyleClass="Field">
+                                <Entry Text="{Binding Reading2ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
+                                       MaxLength="3" HorizontalTextAlignment="Center"
+                                       IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                                       SemanticProperties.Description="Valor da segunda medição" />
+                            </Border>
+                            <Border Grid.Column="1" StyleClass="Field">
+                                <TimePicker Time="{Binding Reading2Time}" Format="HH:mm"
+                                            SemanticProperties.Description="Horário da segunda medição" />
+                            </Border>
+                            <Border Grid.Column="2" StyleClass="Field">
+                                <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding Reading2Context}"
+                                        Title="Contexto" />
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                            <Border Grid.Column="0" StyleClass="Field">
+                                <Entry Text="{Binding Reading3ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
+                                       MaxLength="3" HorizontalTextAlignment="Center"
+                                       IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                                       SemanticProperties.Description="Valor da terceira medição" />
+                            </Border>
+                            <Border Grid.Column="1" StyleClass="Field">
+                                <TimePicker Time="{Binding Reading3Time}" Format="HH:mm"
+                                            SemanticProperties.Description="Horário da terceira medição" />
+                            </Border>
+                            <Border Grid.Column="2" StyleClass="Field">
+                                <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding Reading3Context}"
+                                        Title="Contexto" />
+                            </Border>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExtraReadingVisible}">
+                            <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                                <Border Grid.Column="0" StyleClass="Field">
+                                    <Entry Text="{Binding Reading4ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
+                                           MaxLength="3" HorizontalTextAlignment="Center"
+                                           IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                                           SemanticProperties.Description="Valor da medição extra" />
+                                </Border>
+                                <Border Grid.Column="1" StyleClass="Field">
+                                    <TimePicker Time="{Binding Reading4Time}" Format="HH:mm"
+                                                SemanticProperties.Description="Horário da medição extra" />
+                                </Border>
+                                <Border Grid.Column="2" StyleClass="Field">
+                                    <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding Reading4Context}"
+                                            Title="Contexto" />
+                                </Border>
+                            </Grid>
+                            <Button Text="−" Command="{Binding RemoveExtraReadingCommand}"
+                                    HorizontalOptions="Center" WidthRequest="52"
+                                    SemanticProperties.Description="Remover a medição extra" />
                         </VerticalStackLayout>
-                    </Grid>
 
-                    <Label Text="Glicemia (mg/dL)" StyleClass="Caption" />
-                    <Border StyleClass="Field">
-                        <Entry Text="{Binding ValueText}" Placeholder="Ex.: 98" FontSize="32"
-                               Keyboard="Numeric" MaxLength="3"
-                               IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
-                               SemanticProperties.Description="Valor da glicemia em miligramas por decilitro" />
-                    </Border>
+                        <Button Text="+" Command="{Binding AddExtraReadingCommand}"
+                                IsVisible="{Binding IsAddExtraReadingVisible}"
+                                HorizontalOptions="Center" WidthRequest="52"
+                                SemanticProperties.Description="Adicionar uma linha de medição" />
+                    </VerticalStackLayout>
+                </Border>
 
-                    <Label Text="Contexto" StyleClass="Caption" />
-                    <Border StyleClass="Field">
-                        <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding SelectedContext}" Title="Selecione" />
-                    </Border>
-
+                <VerticalStackLayout Spacing="6">
                     <Label Text="Observação (opcional)" StyleClass="Caption" />
                     <Border StyleClass="Field">
                         <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
                                IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
                     </Border>
-
-                    <Button Text="Salvar registro" Command="{Binding SaveCommand}" Margin="0,8,0,0" />
-
-                    <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
-                                <Setter Property="TextColor" Value="{StaticResource Danger}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
                 </VerticalStackLayout>
-            </Border>
 
-            <Button Text="Cancelar" StyleClass="Secondary" Command="{Binding CancelCommand}" />
-        </VerticalStackLayout>
-    </ScrollView>
+                <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+
+                <Button Text="Salvar medições" Command="{Binding SaveCommand}" />
+                <Button Text="Cancelar" StyleClass="Secondary" Command="{Binding CancelCommand}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

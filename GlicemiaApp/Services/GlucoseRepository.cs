@@ -37,6 +37,43 @@ public sealed class GlucoseRepository(DatabaseService database, SessionService s
         return null;
     }
 
+    public async Task<string?> AddManyBackdatedAsync(
+        IReadOnlyList<(string? ValueText, string? Context, string? Note, DateTime MeasuredAtLocal)> readings)
+    {
+        session.EnsureUnlocked();
+        if (readings.Count == 0) return "Preencha ao menos uma marcação.";
+
+        var nowUtc = DateTime.UtcNow;
+        var rows = new List<GlucoseReading>(readings.Count);
+        for (var index = 0; index < readings.Count; index++)
+        {
+            var reading = readings[index];
+            var (input, error) = InputValidator.Validate(reading.ValueText, reading.Context, reading.Note);
+            if (input is null) return $"Marcação {index + 1}: {error}";
+
+            var measuredUtc = reading.MeasuredAtLocal.ToUniversalTime();
+            var dateError = InputValidator.ValidateMeasuredAt(measuredUtc, nowUtc);
+            if (dateError is not null) return $"Marcação {index + 1}: {dateError}";
+
+            rows.Add(new GlucoseReading
+            {
+                MeasuredAtUtc = measuredUtc,
+                ValueMgDl = input.ValueMgDl,
+                Context = input.Context,
+                Note = input.Note,
+            });
+        }
+
+        var db = await database.GetAsync();
+        await db.RunInTransactionAsync(connection =>
+        {
+            foreach (var row in rows) connection.Insert(row);
+        });
+        await audit.LogAsync("add_reading_backdated");
+        Changed?.Invoke();
+        return null;
+    }
+
     public async Task<List<GlucoseReading>> ListAsync(int days)
     {
         session.EnsureUnlocked();
