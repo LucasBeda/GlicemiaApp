@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_title">Glicemia por refeição</string>
-    <string name="widget_add">+ Registrar</string>
+    <string name="widget_title">Controle de Glicemia</string>
+    <string name="widget_add">Registrar</string>
     <string name="widget_add_description">Registrar nova glicemia</string>
     <string name="widget_empty">Nenhuma medição ainda.</string>
     <string name="widget_date">Data</string>
