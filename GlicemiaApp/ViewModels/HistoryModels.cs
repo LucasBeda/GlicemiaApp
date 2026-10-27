@@ -24,37 +24,43 @@ public sealed class HistoryDay
     public HistoryDay(DateTime day, IEnumerable<GlucoseReading> readings)
     {
         Day = day;
-        var rows = readings.ToArray();
+        var source = readings.ToArray();
+        var orderedReadings = source.OrderBy(reading => reading.MeasuredAtUtc).ToArray();
+        var readingRows = new ReadingRow[orderedReadings.Length];
+        var breakfastReadings = new List<ReadingRow>();
+        var lunchReadings = new List<ReadingRow>();
+        var dinnerReadings = new List<ReadingRow>();
+        var otherReadings = new List<ReadingRow>();
 
-        var breakfastReadings = ForContext(rows, InputValidator.Contexts[0]);
-        var lunchReadings = ForContext(rows, InputValidator.Contexts[1]);
-        var dinnerReadings = ForContext(rows, InputValidator.Contexts[2]);
-        var otherReadings = ForContext(rows, InputValidator.Contexts[3]);
+        for (var index = 0; index < orderedReadings.Length; index++)
+        {
+            var reading = orderedReadings[index];
+            var row = readingRows[index] = new ReadingRow(reading);
+            if (reading.Context == InputValidator.Contexts[0]) breakfastReadings.Add(row);
+            else if (reading.Context == InputValidator.Contexts[1]) lunchReadings.Add(row);
+            else if (reading.Context == InputValidator.Contexts[2]) dinnerReadings.Add(row);
+            else if (reading.Context == InputValidator.Contexts[3]) otherReadings.Add(row);
+        }
 
-        Readings = rows
-            .OrderBy(reading => reading.MeasuredAtUtc)
-            .Select(reading => new ReadingRow(reading))
-            .ToArray();
+        Readings = readingRows;
         LatestReading = Readings[^1];
-        Breakfast = breakfastReadings.LastOrDefault();
-        Lunch = lunchReadings.LastOrDefault();
-        Dinner = dinnerReadings.LastOrDefault();
-        OtherReading = otherReadings.LastOrDefault();
+        Breakfast = breakfastReadings.Count > 0 ? breakfastReadings[^1] : null;
+        Lunch = lunchReadings.Count > 0 ? lunchReadings[^1] : null;
+        Dinner = dinnerReadings.Count > 0 ? dinnerReadings[^1] : null;
+        OtherReading = otherReadings.Count > 0 ? otherReadings[^1] : null;
         BreakfastValue = FormatValues(breakfastReadings);
         LunchValue = FormatValues(lunchReadings);
         DinnerValue = FormatValues(dinnerReadings);
         OtherReadings = otherReadings.Count > 0 ? string.Join(" · ", otherReadings.Select(reading => $"Outra Marcação: {reading.ValueMgDl} ás {reading.Time}")) : "";
 
-        Note = string.Join(" · ", rows
-            .Where(reading => !string.IsNullOrWhiteSpace(reading.Note))
-            .OrderByDescending(reading => reading.MeasuredAtUtc)
-            .Select(reading => $"Obs: {reading.Note.Trim()}")
-            .Distinct());
-        CombinedNote = string.Join(" · ", rows
+        var readingsWithNotes = source
             .Where(reading => !string.IsNullOrWhiteSpace(reading.Note))
             .OrderByDescending(reading => reading.MeasuredAtUtc)
             .Select(reading => reading.Note.Trim())
-            .Distinct());
+            .Distinct()
+            .ToArray();
+        Note = string.Join(" · ", readingsWithNotes.Select(note => $"Obs: {note}"));
+        CombinedNote = string.Join(" · ", readingsWithNotes);
     }
 
     public DateTime Day { get; }
@@ -79,13 +85,6 @@ public sealed class HistoryDay
     public string Note { get; }
     public string CombinedNote { get; }
     public bool HasNote => Note.Length > 0;
-
-    static List<ReadingRow> ForContext(IEnumerable<GlucoseReading> readings, string context) =>
-        readings
-            .Where(item => item.Context == context)
-            .OrderBy(item => item.MeasuredAtUtc)
-            .Select(item => new ReadingRow(item))
-            .ToList();
 
     static string FormatValues(IEnumerable<ReadingRow> readings)
     {

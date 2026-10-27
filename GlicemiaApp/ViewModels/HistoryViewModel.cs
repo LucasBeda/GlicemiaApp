@@ -23,9 +23,15 @@ public partial class HistoryViewModel : SecureViewModel
     async Task LoadCoreAsync()
     {
         var rows = await _repository.ListAsync(days: GlicemiaApp.Core.InputValidator.MaxBackdateDays);
+        var days = await Task.Run(() => rows
+            .GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date)
+            .OrderByDescending(g => g.Key)
+            .Select(group => new HistoryDay(group.Key, group))
+            .ToArray());
+
         Days.Clear();
-        foreach (var day in rows.GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date).OrderByDescending(g => g.Key))
-            Days.Add(new HistoryDay(day.Key, day));
+        foreach (var day in days)
+            Days.Add(day);
 
         Show(rows.Count == 0 ? "" : "Toque em um dia para editar as medições desse dia.");
     }
