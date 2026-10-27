@@ -4,15 +4,18 @@
              xmlns:vm="clr-namespace:GlicemiaApp.ViewModels"
              x:Class="GlicemiaApp.Views.AddPastReadingPage"
              x:DataType="vm:AddPastReadingViewModel"
-             Title="Adicionar ao histórico">
+             Title="{Binding Title}">
 
     <Grid>
-        <ScrollView>
+        <ScrollView IsVisible="{Binding IsNotEditing}">
             <VerticalStackLayout Padding="20" Spacing="16">
 
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Adicionar ao histórico" StyleClass="Title" />
-                    <Label Text="Escolha a data e preencha uma ou mais medições." StyleClass="Muted" />
+                    <Label Text="{Binding Title}" StyleClass="Title" />
+                    <Label Text="Escolha a data e preencha uma ou mais medições."
+                           StyleClass="Muted" IsVisible="{Binding IsNotEditing}" />
+                    <Label Text="Altere os dados desta medição." StyleClass="Muted"
+                           IsVisible="{Binding IsEditing}" />
                 </VerticalStackLayout>
 
                 <Border StyleClass="Card" Padding="16">
@@ -50,7 +53,7 @@
                             </Border>
                         </Grid>
 
-                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8" IsVisible="{Binding IsNotEditing}">
                             <Border Grid.Column="0" StyleClass="Field">
                                 <Entry Text="{Binding Reading2ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
                                        MaxLength="3" HorizontalTextAlignment="Center"
@@ -67,7 +70,7 @@
                             </Border>
                         </Grid>
 
-                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8" IsVisible="{Binding IsNotEditing}">
                             <Border Grid.Column="0" StyleClass="Field">
                                 <Entry Text="{Binding Reading3ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
                                        MaxLength="3" HorizontalTextAlignment="Center"
@@ -129,9 +132,86 @@
                     </Label.Triggers>
                 </Label>
 
-                <Button Text="Salvar medições" Command="{Binding SaveCommand}" />
+                <Button Text="{Binding SaveButtonText}" Command="{Binding SaveCommand}" />
+                <Button Text="Excluir registro" StyleClass="Secondary" Command="{Binding DeleteCommand}"
+                        IsVisible="{Binding IsEditing}" />
                 <Button Text="Cancelar" StyleClass="Secondary" Command="{Binding CancelCommand}" />
             </VerticalStackLayout>
         </ScrollView>
+
+        <CollectionView ItemsSource="{Binding EditingReadings}" IsVisible="{Binding IsEditing}"
+                        SelectionMode="None">
+            <CollectionView.Header>
+                <VerticalStackLayout Padding="20,20,20,8" Spacing="16">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding Title}" StyleClass="Title" />
+                        <Label Text="Edite as medições registradas neste dia." StyleClass="Muted" />
+                    </VerticalStackLayout>
+
+                    <Border StyleClass="Card" Padding="16">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Data" StyleClass="Caption" />
+                            <Border StyleClass="Field">
+                                <DatePicker Date="{Binding Date}" MinimumDate="{Binding MinDate}"
+                                            MaximumDate="{Binding MaxDate}" Format="dd/MM/yyyy"
+                                            SemanticProperties.Description="Data das medições" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8" Padding="12,0">
+                        <Label Grid.Column="0" Text="Glicemia" StyleClass="Caption" />
+                        <Label Grid.Column="1" Text="Horário" StyleClass="Caption" />
+                        <Label Grid.Column="2" Text="Contexto" StyleClass="Caption" />
+                    </Grid>
+                </VerticalStackLayout>
+            </CollectionView.Header>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:EditableReading">
+                    <Border StyleClass="Card" Padding="12" Margin="20,0,20,8">
+                        <Grid ColumnDefinitions="1.1*,1.25*,2*" ColumnSpacing="8">
+                            <Border Grid.Column="0" StyleClass="Field">
+                                <Entry Text="{Binding ValueText}" Placeholder="mg/dL" Keyboard="Numeric"
+                                       MaxLength="3" HorizontalTextAlignment="Center"
+                                       IsTextPredictionEnabled="False" IsSpellCheckEnabled="False"
+                                       SemanticProperties.Description="Valor da medição" />
+                            </Border>
+                            <Border Grid.Column="1" StyleClass="Field">
+                                <TimePicker Time="{Binding Time}" Format="HH:mm"
+                                            SemanticProperties.Description="Horário da medição" />
+                            </Border>
+                            <Border Grid.Column="2" StyleClass="Field">
+                                <Picker ItemsSource="{Binding Contexts}" SelectedItem="{Binding Context}"
+                                        Title="Contexto" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.Footer>
+                <VerticalStackLayout Padding="20,8,20,20" Spacing="10">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Observação (opcional)" StyleClass="Caption" />
+                        <Border StyleClass="Field">
+                            <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
+                                   IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Button Text="Editar medições" Command="{Binding SaveCommand}" />
+                    <Button Text="Excluir todas as medições do dia" StyleClass="Secondary"
+                            Command="{Binding DeleteCommand}" />
+                    <Button Text="Cancelar" StyleClass="Secondary" Command="{Binding CancelCommand}" />
+                </VerticalStackLayout>
+            </CollectionView.Footer>
+        </CollectionView>
     </Grid>
 </ContentPage>

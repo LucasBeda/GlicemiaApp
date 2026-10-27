@@ -20,21 +20,6 @@ public partial class HistoryViewModel : SecureViewModel
     [RelayCommand]
     private Task LoadAsync() => RunAsync(LoadCoreAsync);
 
-    [RelayCommand]
-    private async Task DeleteAsync(ReadingRow? row)
-    {
-        if (row is null) return;
-        var confirmed = await Shell.Current.CurrentPage.DisplayAlertAsync(
-            "Excluir registro", $"Excluir a medição das {row.Time}? Isso não pode ser desfeito.", "Excluir", "Cancelar");
-        if (!confirmed) return;
-
-        await RunAsync(async () =>
-        {
-            await _repository.DeleteAsync(row.Id);
-            await LoadCoreAsync();
-        });
-    }
-
     async Task LoadCoreAsync()
     {
         var rows = await _repository.ListAsync(days: GlicemiaApp.Core.InputValidator.MaxBackdateDays);
@@ -42,6 +27,6 @@ public partial class HistoryViewModel : SecureViewModel
         foreach (var day in rows.GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date).OrderByDescending(g => g.Key))
             Days.Add(new HistoryDay(day.Key, day));
 
-        Show(rows.Count == 0 ? "" : "Toque em um valor para excluí-lo.");
+        Show(rows.Count == 0 ? "" : "Toque em um dia para editar as medições desse dia.");
     }
 }

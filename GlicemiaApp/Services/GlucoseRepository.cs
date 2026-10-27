@@ -49,11 +49,11 @@ public sealed class GlucoseRepository(DatabaseService database, SessionService s
         {
             var reading = readings[index];
             var (input, error) = InputValidator.Validate(reading.ValueText, reading.Context, reading.Note);
-            if (input is null) return $"Marcação {index + 1}: {error}";
+            if (input is null) return $"Medição {index + 1}: {error}";
 
             var measuredUtc = reading.MeasuredAtLocal.ToUniversalTime();
             var dateError = InputValidator.ValidateMeasuredAt(measuredUtc, nowUtc);
-            if (dateError is not null) return $"Marcação {index + 1}: {dateError}";
+            if (dateError is not null) return $"Medição {index + 1}: {dateError}";
 
             rows.Add(new GlucoseReading
             {
@@ -70,6 +70,115 @@ public sealed class GlucoseRepository(DatabaseService database, SessionService s
             foreach (var row in rows) connection.Insert(row);
         });
         await audit.LogAsync("add_reading_backdated");
+        Changed?.Invoke();
+        return null;
+    }
+
+    public async Task<string?> UpdateAsync(int id, string? valueText, string? context, string? note, DateTime measuredAtLocal)
+    {
+        session.EnsureUnlocked();
+        var (input, error) = InputValidator.Validate(valueText, context, note);
+        if (input is null) return error;
+
+        var measuredUtc = measuredAtLocal.ToUniversalTime();
+        var dateError = InputValidator.ValidateMeasuredAt(measuredUtc, DateTime.UtcNow);
+        if (dateError is not null) return dateError;
+
+        var db = await database.GetAsync();
+        var reading = await db.FindAsync<GlucoseReading>(id);
+        if (reading is null) return "O registro não foi encontrado. Atualize o histórico e tente novamente.";
+
+        reading.MeasuredAtUtc = measuredUtc;
+        reading.ValueMgDl = input.ValueMgDl;
+        reading.Context = input.Context;
+        reading.Note = input.Note;
+        await db.UpdateAsync(reading);
+        await audit.LogAsync("edit_reading");
+        Changed?.Invoke();
+        return null;
+    }
+
+    public async Task<string?> UpdateManyAsync(
+        IReadOnlyList<(int Id, string? ValueText, string? Context, DateTime MeasuredAtLocal)> readings,
+        string? note)
+    {
+        session.EnsureUnlocked();
+        if (readings.Count == 0) return "Não há medições para atualizar.";
+
+        var nowUtc = DateTime.UtcNow;
+        var updates = new List<(int Id, GlucoseReading Reading)>(readings.Count);
+        var ids = new HashSet<int>();
+        for (var index = 0; index < readings.Count; index++)
+        {
+            var item = readings[index];
+            if (!ids.Add(item.Id)) return "Há medições duplicadas na edição. Feche e abra o histórico novamente.";
+
+            var (input, error) = InputValidator.Validate(item.ValueText, item.Context, note);
+            if (input is null) return $"Medição {index + 1}: {error}";
+
+            var measuredUtc = item.MeasuredAtLocal.ToUniversalTime();
+            var dateError = InputValidator.ValidateMeasuredAt(measuredUtc, nowUtc);
+            if (dateError is not null) return $"Medição {index + 1}: {dateError}";
+
+            updates.Add((item.Id, new GlucoseReading
+            {
+                MeasuredAtUtc = measuredUtc,
+                ValueMgDl = input.ValueMgDl,
+                Context = input.Context,
+                Note = input.Note,
+            }));
+        }
+
+        var db = await database.GetAsync();
+        var existing = new List<GlucoseReading>(updates.Count);
+        foreach (var update in updates)
+        {
+            var reading = await db.FindAsync<GlucoseReading>(update.Id);
+            if (reading is null) return "Um ou mais registros não foram encontrados. Atualize o histórico e tente novamente.";
+            existing.Add(reading);
+        }
+
+        await db.RunInTransactionAsync(connection =>
+        {
+            for (var index = 0; index < updates.Count; index++)
+            {
+                existing[index].MeasuredAtUtc = updates[index].Reading.MeasuredAtUtc;
+                existing[index].ValueMgDl = updates[index].Reading.ValueMgDl;
+                existing[index].Context = updates[index].Reading.Context;
+                existing[index].Note = updates[index].Reading.Note;
+                connection.Update(existing[index]);
+            }
+        });
+        await audit.LogAsync("edit_reading");
+        Changed?.Invoke();
+        return null;
+    }
+
+    public async Task<string?> DeleteManyAsync(IReadOnlyCollection<int> ids)
+    {
+        session.EnsureUnlocked();
+        if (ids.Count == 0) return "Não há medições para excluir.";
+
+        var uniqueIds = ids.ToHashSet();
+        if (uniqueIds.Count != ids.Count || uniqueIds.Any(id => id <= 0))
+            return "A lista de medições é inválida. Atualize o histórico e tente novamente.";
+
+        var db = await database.GetAsync();
+        var readings = new List<GlucoseReading>(uniqueIds.Count);
+        foreach (var id in uniqueIds)
+        {
+            var reading = await db.FindAsync<GlucoseReading>(id);
+            if (reading is null)
+                return "Um ou mais registros não foram encontrados. Atualize o histórico e tente novamente.";
+            readings.Add(reading);
+        }
+
+        await db.RunInTransactionAsync(connection =>
+        {
+            foreach (var reading in readings)
+                connection.Delete<GlucoseReading>(reading.Id);
+        });
+        await audit.LogAsync("delete_reading");
         Changed?.Invoke();
         return null;
     }

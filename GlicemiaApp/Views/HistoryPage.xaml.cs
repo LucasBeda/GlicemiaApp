@@ -22,20 +22,32 @@ public partial class HistoryPage : ContentPage
     {
         if (Handler?.MauiContext?.Services.GetService(typeof(AddPastReadingPage)) is not AddPastReadingPage modal) return;
 
-        // Ao fechar o modal (salvou ou cancelou), recarrega a lista.
-        modal.Disappearing += (_, _) => _vm.LoadCommand.Execute(null);
-        await Navigation.PushModalAsync(modal);
+        await ShowModalAsync(modal);
     }
 
-    void OnBreakfastTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Breakfast);
-
-    void OnLunchTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Lunch);
-
-    void OnDinnerTapped(object? sender, TappedEventArgs e) => DeleteReading(sender, day => day.Dinner);
-
-    void DeleteReading(object? sender, Func<HistoryDay, ReadingRow?> selectReading)
+    async void OnHistoryDayTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is BindableObject { BindingContext: HistoryDay day } && selectReading(day) is ReadingRow row)
-            _vm.DeleteCommand.Execute(row);
+        if (sender is BindableObject { BindingContext: HistoryDay day })
+            await OpenEditModalAsync(day);
+    }
+
+    async Task OpenEditModalAsync(HistoryDay day)
+    {
+        if (Handler?.MauiContext?.Services.GetService(typeof(AddPastReadingPage)) is not AddPastReadingPage modal) return;
+
+        modal.PrepareForEdit(day);
+        await ShowModalAsync(modal);
+    }
+
+    async Task ShowModalAsync(AddPastReadingPage modal)
+    {
+        EventHandler? onDisappearing = null;
+        onDisappearing = (_, _) =>
+        {
+            modal.Disappearing -= onDisappearing;
+            _vm.LoadCommand.Execute(null);
+        };
+        modal.Disappearing += onDisappearing;
+        await Navigation.PushModalAsync(modal);
     }
 }

@@ -9,6 +9,7 @@ public sealed class ReadingRow(GlucoseReading reading)
     const int Low = 80, High = 180;
 
     public int Id => reading.Id;
+    public DateTime MeasuredAtLocal => reading.MeasuredAtUtc.ToLocalTime();
     public string Time => reading.MeasuredAtUtc.ToLocalTime().ToString("HH:mm");
     public int ValueMgDl => reading.ValueMgDl;
     public string Context => reading.Context;
@@ -30,9 +31,15 @@ public sealed class HistoryDay
         var dinnerReadings = ForContext(rows, InputValidator.Contexts[2]);
         var otherReadings = ForContext(rows, InputValidator.Contexts[3]);
 
+        Readings = rows
+            .OrderBy(reading => reading.MeasuredAtUtc)
+            .Select(reading => new ReadingRow(reading))
+            .ToArray();
+        LatestReading = Readings[^1];
         Breakfast = breakfastReadings.LastOrDefault();
         Lunch = lunchReadings.LastOrDefault();
         Dinner = dinnerReadings.LastOrDefault();
+        OtherReading = otherReadings.LastOrDefault();
         BreakfastValue = FormatValues(breakfastReadings);
         LunchValue = FormatValues(lunchReadings);
         DinnerValue = FormatValues(dinnerReadings);
@@ -43,13 +50,21 @@ public sealed class HistoryDay
             .OrderByDescending(reading => reading.MeasuredAtUtc)
             .Select(reading => $"Obs: {reading.Note.Trim()}")
             .Distinct());
+        CombinedNote = string.Join(" · ", rows
+            .Where(reading => !string.IsNullOrWhiteSpace(reading.Note))
+            .OrderByDescending(reading => reading.MeasuredAtUtc)
+            .Select(reading => reading.Note.Trim())
+            .Distinct());
     }
 
     public DateTime Day { get; }
     public string Date => Day.ToString("dd/MM/yy");
+    public IReadOnlyList<ReadingRow> Readings { get; }
+    public ReadingRow LatestReading { get; }
     public ReadingRow? Breakfast { get; }
     public ReadingRow? Lunch { get; }
     public ReadingRow? Dinner { get; }
+    public ReadingRow? OtherReading { get; }
     public string BreakfastValue { get; }
     public string LunchValue { get; }
     public string DinnerValue { get; }
@@ -62,6 +77,7 @@ public sealed class HistoryDay
     public bool HasDinner => Dinner is not null;
     public bool HasOtherReadings => OtherReadings.Length > 0;
     public string Note { get; }
+    public string CombinedNote { get; }
     public bool HasNote => Note.Length > 0;
 
     static List<ReadingRow> ForContext(IEnumerable<GlucoseReading> readings, string context) =>
