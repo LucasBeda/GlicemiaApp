@@ -119,8 +119,9 @@
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Observação (opcional)" StyleClass="Caption" />
                     <Border StyleClass="Field">
-                        <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
-                               IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
+                        <Editor Text="{Binding Note}" Placeholder="Ex.: depois da caminhada"
+                                AutoSize="TextChanges" MaxLength="140"
+                                IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
                     </Border>
                 </VerticalStackLayout>
 
@@ -195,8 +196,9 @@
                     <VerticalStackLayout Spacing="6">
                         <Label Text="Observação (opcional)" StyleClass="Caption" />
                         <Border StyleClass="Field">
-                            <Entry Text="{Binding Note}" Placeholder="Ex.: depois da caminhada" MaxLength="140"
-                                   IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
+                            <Editor Text="{Binding Note}" Placeholder="Ex.: depois da caminhada"
+                                    AutoSize="TextChanges" MaxLength="140"
+                                    IsTextPredictionEnabled="False" IsSpellCheckEnabled="False" />
                         </Border>
                     </VerticalStackLayout>
                     <Label Text="{Binding Message}" StyleClass="Muted" HorizontalTextAlignment="Center">
