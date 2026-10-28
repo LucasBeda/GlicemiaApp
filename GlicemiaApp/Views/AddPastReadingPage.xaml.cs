@@ -12,5 +12,7 @@ public partial class AddPastReadingPage : ContentPage
         BindingContext = _vm = vm;
     }
 
+    public bool HasChanges => _vm.HasChanges;
+
     public void PrepareForEdit(HistoryDay day) => _vm.PrepareForEdit(day);
 }

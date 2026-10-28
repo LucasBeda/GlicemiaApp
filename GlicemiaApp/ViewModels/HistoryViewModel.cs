@@ -1,6 +1,6 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GlicemiaApp.Services;
-using System.Collections.ObjectModel;
 
 namespace GlicemiaApp.ViewModels;
 
@@ -8,13 +8,14 @@ public partial class HistoryViewModel : SecureViewModel
 {
     readonly GlucoseRepository _repository;
 
-    public ObservableCollection<HistoryDay> Days { get; } = [];
+    [ObservableProperty]
+    private IReadOnlyList<HistoryDay> days = Array.Empty<HistoryDay>();
 
     public HistoryViewModel(GlucoseRepository repository, SessionService session)
     {
         _repository = repository;
         // Ao bloquear, os dados saem da memória da tela.
-        session.Locked += () => MainThread.BeginInvokeOnMainThread(Days.Clear);
+        session.Locked += () => MainThread.BeginInvokeOnMainThread(() => Days = Array.Empty<HistoryDay>());
     }
 
     [RelayCommand]
@@ -29,9 +30,7 @@ public partial class HistoryViewModel : SecureViewModel
             .Select(group => new HistoryDay(group.Key, group))
             .ToArray());
 
-        Days.Clear();
-        foreach (var day in days)
-            Days.Add(day);
+        Days = days;
 
         Show(rows.Count == 0 ? "" : "Toque em um dia para editar as medições desse dia.");
     }

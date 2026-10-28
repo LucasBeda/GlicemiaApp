@@ -5,6 +5,7 @@ namespace GlicemiaApp.Views;
 public partial class HistoryPage : ContentPage
 {
     readonly HistoryViewModel _vm;
+    bool _isReturningFromModal;
 
     public HistoryPage(HistoryViewModel vm)
     {
@@ -15,6 +16,12 @@ public partial class HistoryPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        if (_isReturningFromModal)
+        {
+            _isReturningFromModal = false;
+            return;
+        }
+
         _vm.LoadCommand.Execute(null);
     }
 
@@ -45,7 +52,9 @@ public partial class HistoryPage : ContentPage
         onDisappearing = (_, _) =>
         {
             modal.Disappearing -= onDisappearing;
-            _vm.LoadCommand.Execute(null);
+            _isReturningFromModal = true;
+            if (modal.HasChanges)
+                _vm.LoadCommand.Execute(null);
         };
         modal.Disappearing += onDisappearing;
         await Navigation.PushModalAsync(modal);

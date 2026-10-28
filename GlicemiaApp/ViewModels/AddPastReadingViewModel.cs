@@ -41,6 +41,7 @@ public partial class AddPastReadingViewModel(GlucoseRepository repository) : Sec
 
     public string[] Contexts => InputValidator.Contexts;
     public ObservableCollection<EditableReading> EditingReadings { get; } = [];
+    public bool HasChanges { get; private set; }
     public DateTime MinDate { get; } = DateTime.Today.AddDays(-InputValidator.MaxBackdateDays);
     public DateTime MaxDate { get; } = DateTime.Today;
     public bool IsAddExtraReadingVisible => IsNotEditing && !IsExtraReadingVisible;
@@ -50,6 +51,7 @@ public partial class AddPastReadingViewModel(GlucoseRepository repository) : Sec
 
     public void PrepareForEdit(HistoryDay day)
     {
+        HasChanges = false;
         _editingReadingIds = day.Readings.Select(reading => reading.Id).ToArray();
         IsEditing = true;
         Date = day.Day;
@@ -86,6 +88,7 @@ public partial class AddPastReadingViewModel(GlucoseRepository repository) : Sec
             var updateError = await repository.UpdateManyAsync(updates, Note);
             if (updateError is not null) { Show(updateError, true); return; }
 
+            HasChanges = true;
             await Shell.Current.Navigation.PopModalAsync();
             return;
         }
@@ -100,6 +103,7 @@ public partial class AddPastReadingViewModel(GlucoseRepository repository) : Sec
         var error = await repository.AddManyBackdatedAsync(readings);
         if (error is not null) { Show(error, true); return; }
 
+        HasChanges = true;
         await Shell.Current.Navigation.PopModalAsync();
     });
 
@@ -140,6 +144,7 @@ public partial class AddPastReadingViewModel(GlucoseRepository repository) : Sec
 
         var error = await repository.DeleteManyAsync(_editingReadingIds);
         if (error is not null) { Show(error, true); return; }
+        HasChanges = true;
         await Shell.Current.Navigation.PopModalAsync();
     });
 }
