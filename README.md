@@ -6,7 +6,7 @@ App para registrar a glicemia na hora da medição e ver o histórico agrupado p
 - **Histórico**: grid com um bloco por dia (data, quantidade e média) e uma linha por registro (hora, mg/dL, contexto, faixa). Toque em uma linha para excluir.
 - **Adicionar ao histórico**: botão "+ Adicionar" no histórico abre um modal com os mesmos campos de Registrar, mais data e hora (até 30 dias para trás, sem futuro).
 - **Widget Android**: na tela inicial, segure em um espaço vazio > Widgets > Glicemia. O widget mostra até 3 datas recentes com os valores mais recentes de café da manhã, almoço e jantar, além das observações, e atualiza ao salvar ou excluir. O botão "+ Registrar" abre o registro rápido (só glicemia e contexto) depois do PIN. Atenção: os valores e as observações aparecem na tela inicial sem PIN; para esconder essa exposição, remova o widget.
-- **Segurança**: PIN, banco criptografado, bloqueio automático, tela protegida. Detalhes e roteiro de pentest em [SECURITY.md](SECURITY.md).
+- **Segurança**: PIN, banco criptografado, bloqueio automático, tela protegida e desbloqueio opcional por biometria (impressão digital ou reconhecimento facial; Android 9+). A biometria é habilitada na tela de PIN e pode ser desativada por lá; o PIN continua disponível como alternativa. Detalhes e roteiro de pentest em [SECURITY.md](SECURITY.md).
 - **Design**: tokens de cor em `Resources/Styles/Colors.xaml`, estilos reutilizáveis em `Styles.xaml` (classes `Card`, `Field`, `Chip`, `Title`, `Muted`...), tema claro e escuro automáticos.
 
 ## Estrutura

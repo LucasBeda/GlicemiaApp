@@ -1,6 +1,9 @@
 using GlicemiaApp.Services;
 using GlicemiaApp.ViewModels;
 using GlicemiaApp.Views;
+#if MAUI_DEVFLOW
+using Microsoft.Maui.DevFlow.Agent;
+#endif
 
 namespace GlicemiaApp;
 
@@ -10,9 +13,17 @@ public static class MauiProgram
     {
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>();
+#if MAUI_DEVFLOW
+        builder.AddMauiDevFlowAgent();
+#endif
 
         // Sem pacote de logging de propósito: nada de dados de saúde em logs.
         builder.Services
+#if ANDROID
+            .AddSingleton<IBiometricAuthenticationService, GlicemiaApp.Platforms.BiometricAuthenticationService>()
+#elif IOS
+            .AddSingleton<IBiometricAuthenticationService, GlicemiaApp.Platforms.BiometricAuthenticationService>()
+#endif
             .AddSingleton<SessionService>()
             .AddSingleton<SecurityService>()
             .AddSingleton<DatabaseService>()

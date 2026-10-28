@@ -6,7 +6,8 @@ namespace GlicemiaApp.Services;
 /// <summary>Segredos no Keystore (Android) / Keychain (iOS) via SecureStorage.</summary>
 public sealed class SecurityService
 {
-    const string DbKeyName = "db_key", PinName = "pin_hash", FailsName = "pin_fails", LockUntilName = "pin_lock_until";
+    const string DbKeyName = "db_key", PinName = "pin_hash", FailsName = "pin_fails", LockUntilName = "pin_lock_until",
+        BiometricEnabledName = "biometric_enabled";
     const int FreeAttempts = 5, MaxLockSeconds = 900;
 
     static Task<string?> GetAsync(string key) => SecureStorage.Default.GetAsync(key);
@@ -24,6 +25,12 @@ public sealed class SecurityService
     }
 
     public async Task<bool> HasPinAsync() => await GetAsync(PinName) is not null;
+
+    public async Task<bool> IsBiometricEnabledAsync() =>
+        await GetAsync(BiometricEnabledName) == bool.TrueString;
+
+    public Task SetBiometricEnabledAsync(bool enabled) =>
+        SetAsync(BiometricEnabledName, enabled.ToString());
 
     public async Task SetPinAsync(string pin) =>
         await SetAsync(PinName, await Task.Run(() => PinHasher.Hash(pin)));

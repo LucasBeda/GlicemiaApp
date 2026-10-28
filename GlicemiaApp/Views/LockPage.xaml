@@ -44,5 +44,8 @@
         </Label>
 
         <Button Text="{Binding ButtonText}" Command="{Binding SubmitCommand}" />
+        <Button Text="{Binding BiometricButtonText}" StyleClass="Secondary"
+                Command="{Binding ToggleBiometricCommand}"
+                IsVisible="{Binding ShowBiometricButton}" />
     </VerticalStackLayout>
 </ContentPage>
