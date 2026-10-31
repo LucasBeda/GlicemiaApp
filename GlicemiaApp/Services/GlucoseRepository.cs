@@ -183,16 +183,21 @@ public sealed class GlucoseRepository(DatabaseService database, SessionService s
         return null;
     }
 
-    public async Task<List<GlucoseReading>> ListAsync(int days)
+    public async Task<List<GlucoseReading>> ListAsync(int? days)
     {
         session.EnsureUnlocked();
-        var since = DateTime.Today.AddDays(-days).ToUniversalTime(); // meia-noite local, igual ao seletor de datas
         var db = await database.GetAsync();
-        var rows = await db.Table<GlucoseReading>()
-            .Where(r => r.MeasuredAtUtc >= since)
-            .OrderByDescending(r => r.MeasuredAtUtc)
-            .Take(1000)
-            .ToListAsync();
+        var query = db.Table<GlucoseReading>();
+        if (days.HasValue)
+        {
+            var since = DateTime.Today.AddDays(1 - days.Value).ToUniversalTime();
+            query = query.Where(r => r.MeasuredAtUtc >= since);
+        }
+
+        var orderedQuery = query.OrderByDescending(r => r.MeasuredAtUtc);
+        var rows = days.HasValue
+            ? await orderedQuery.Take(1000).ToListAsync()
+            : await orderedQuery.ToListAsync();
         await audit.LogAsync("view_history");
         return rows;
     }

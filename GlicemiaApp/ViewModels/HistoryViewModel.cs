@@ -6,24 +6,45 @@ namespace GlicemiaApp.ViewModels;
 
 public partial class HistoryViewModel : SecureViewModel
 {
+    const int RecentDays = 7;
+
     readonly GlucoseRepository _repository;
 
     [ObservableProperty]
     private IReadOnlyList<HistoryDay> days = Array.Empty<HistoryDay>();
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HistoryRangeButtonText))]
+    private bool isShowingAllHistory;
+
+    public string HistoryRangeButtonText =>
+        IsShowingAllHistory ? "Mostrar últimos 7 dias" : "Carregar todo o histórico";
+
     public HistoryViewModel(GlucoseRepository repository, SessionService session)
     {
         _repository = repository;
         // Ao bloquear, os dados saem da memória da tela.
-        session.Locked += () => MainThread.BeginInvokeOnMainThread(() => Days = Array.Empty<HistoryDay>());
+        session.Locked += () => MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Days = Array.Empty<HistoryDay>();
+            IsShowingAllHistory = false;
+        });
     }
 
     [RelayCommand]
-    private Task LoadAsync() => RunAsync(LoadCoreAsync);
+    private Task LoadAsync() => RunAsync(() => LoadCoreAsync(IsShowingAllHistory));
 
-    async Task LoadCoreAsync()
+    [RelayCommand]
+    private Task ToggleHistoryRangeAsync() => RunAsync(async () =>
     {
-        var rows = await _repository.ListAsync(days: GlicemiaApp.Core.InputValidator.MaxBackdateDays);
+        var showAll = !IsShowingAllHistory;
+        await LoadCoreAsync(showAll);
+        IsShowingAllHistory = showAll;
+    });
+
+    async Task LoadCoreAsync(bool showAll)
+    {
+        var rows = await _repository.ListAsync(days: showAll ? null : RecentDays);
         var days = await Task.Run(() => rows
             .GroupBy(r => r.MeasuredAtUtc.ToLocalTime().Date)
             .OrderByDescending(g => g.Key)
